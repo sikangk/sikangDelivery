@@ -13,6 +13,18 @@ import { RootState } from './src/store/reducer';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+export type RootStackParamList = {
+    SignIn: undefined;
+    SignUp: undefined;
+};
+
+export type LoggedInParamList = {
+    Orders: undefined;
+    Settings: undefined;
+    Delivery: undefined;
+    Complete: { orderId: string };
+};
+
 function AppInner() {
     const isLoggedIn = useSelector((state: RootState) => !!state.user.email);
 

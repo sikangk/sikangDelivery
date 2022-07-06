@@ -9,6 +9,15 @@ import SignIn from './src/pages/SignIn';
 import SignUp from './src/pages/SignUp';
 import { useSelector } from 'react-redux';
 import { RootState } from './src/store/reducer';
+import { useEffect } from 'react';
+import useSocket from './src/hooks/useSocket';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import Config from 'react-native-config';
+import axios, { AxiosError } from 'axios';
+import userSlice from './src/slices/user';
+import { useAppDispatch } from './src/store';
+import { Alert } from 'react-native';
+import orderSlice from './src/slices/order';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -27,6 +36,68 @@ export type LoggedInParamList = {
 
 function AppInner() {
     const isLoggedIn = useSelector((state: RootState) => !!state.user.email);
+    const [socket, disconnect] = useSocket();
+
+    const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        const getTokenAndRefresh = async () => {
+            try {
+                const token = await EncryptedStorage.getItem('refreshToken');
+                if (!token) {
+                    return;
+                }
+                const response = await axios.post(
+                    `${Config.API_URL}/refreshToken`,
+                    {},
+                    {
+                        headers: {
+                            authorization: `Bearer ${token}`,
+                        },
+                    },
+                );
+                dispatch(
+                    userSlice.actions.setUser({
+                        name: response.data.data.name,
+                        email: response.data.data.email,
+                        accessToken: response.data.data.accessToken,
+                    }),
+                );
+            } catch (error: any) {
+                console.error(error);
+                if ((error as AxiosError<any>).response?.data.code === 'expired') {
+                    Alert.alert('알림', '다시 로그인 해주세요.');
+                }
+            } finally {
+                //스플래시 스크린 없애기
+            }
+        };
+        getTokenAndRefresh();
+    }, [dispatch]);
+
+    useEffect(() => {
+        const helloCallback = (data: any) => {
+            console.log(data, '222');
+            dispatch(orderSlice.actions.addOrder(data));
+        };
+        if (socket && isLoggedIn) {
+            console.log(socket);
+            socket.emit('acceptOrder', 'hello'); //서버로 요청할때,
+            socket.on('order', helloCallback); //서버에서 받을때,
+        }
+        return () => {
+            if (socket) {
+                socket.off('order', helloCallback);
+            }
+        };
+    }, [isLoggedIn, socket]);
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            console.log('!isLoggedIn', !isLoggedIn);
+            disconnect();
+        }
+    }, [dispatch, isLoggedIn, disconnect]);
 
 
     return (

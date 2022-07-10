@@ -18,6 +18,7 @@ import userSlice from './src/slices/user';
 import { useAppDispatch } from './src/store';
 import { Alert } from 'react-native';
 import orderSlice from './src/slices/order';
+import usePermissions from './src/hooks/usePermissions';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -39,6 +40,42 @@ function AppInner() {
     const [socket, disconnect] = useSocket();
 
     const dispatch = useAppDispatch();
+
+    usePermissions();
+
+
+    useEffect(() => {
+        axios.interceptors.response.use(
+            response => {
+                return response;
+            },
+            async error => {
+                const {
+                    config,
+                    response: { status },
+                } = error;
+                if (status === 419) {
+                    if (error.response.data.code === 'expired') {
+                        const originalRequest = config;
+                        const refreshToken = await EncryptedStorage.getItem('refreshToken');
+                        // token refresh 요청
+                        const { data } = await axios.post(
+                            `${Config.API_URL}/refreshToken`, // token refresh api
+                            {},
+                            { headers: { authorization: `Bearer ${refreshToken}` } },
+                        );
+                        // 새로운 토큰 저장
+                        dispatch(userSlice.actions.setAccessToken(data.data.accessToken));
+                        originalRequest.headers.authorization = `Bearer ${data.data.accessToken}`;
+                        // 419로 요청 실패했던 요청 새로운 토큰으로 재요청
+                        console.log(originalRequest, 'originalRequest');
+                        return axios(originalRequest);
+                    }
+                }
+                return Promise.reject(error);
+            },
+        );
+    }, [dispatch]);
 
     useEffect(() => {
         const getTokenAndRefresh = async () => {

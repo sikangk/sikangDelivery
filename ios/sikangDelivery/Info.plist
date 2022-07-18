@@ -65,5 +65,9 @@
 	<false/>
 	<key>NMFClientId</key>
     <string>8jol0pc31o</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tmap</string>
+	</array>
 </dict>
 </plist>

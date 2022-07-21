@@ -19,6 +19,7 @@ import { useAppDispatch } from './src/store';
 import { Alert } from 'react-native';
 import orderSlice from './src/slices/order';
 import usePermissions from './src/hooks/usePermissions';
+import SplashScreen from 'react-native-splash-screen'
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -81,7 +82,9 @@ function AppInner() {
             try {
                 const token = await EncryptedStorage.getItem('refreshToken');
                 if (!token) {
+                    SplashScreen.hide();
                     return;
+                  
                 }
                 const response = await axios.post(
                     `${Config.API_URL}/refreshToken`,
@@ -106,6 +109,7 @@ function AppInner() {
                 }
             } finally {
                 //스플래시 스크린 없애기
+                SplashScreen.hide();
             }
         };
         getTokenAndRefresh();

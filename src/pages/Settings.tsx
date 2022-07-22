@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View, FlatList, Dimensions } from 'react-native';
 import axios, { AxiosError } from 'axios';
 import Config from 'react-native-config';
 import { useAppDispatch } from '../store';
@@ -7,11 +7,15 @@ import userSlice from '../slices/user';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducer';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import orderSlice, { Order } from '../slices/order';
+import FastImage from 'react-native-fast-image';
+
 
 function Settings() {
     const accessToken = useSelector((state: RootState) => state.user.accessToken);
     const money = useSelector((state: RootState) => state.user.money);
     const name = useSelector((state: RootState) => state.user.name);
+    const completes = useSelector((state: RootState) => state.order.completes);
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -26,6 +30,17 @@ function Settings() {
         }
         getMoney();
     }, [accessToken, dispatch]);
+
+    useEffect(() => {
+        async function getCompletes() {
+            const response = await axios.get<{ data: Order[] }>(`${Config.API_URL}/completes`, {
+                headers: { authorization: `Bearer ${accessToken}` },
+            })
+            dispatch(orderSlice.actions.setCompletes(response.data.data));
+        }
+        getCompletes();
+    }, [dispatch, accessToken])
+
 
     const onLogout = useCallback(async () => {
         try {
@@ -53,6 +68,19 @@ function Settings() {
         }
     }, [accessToken, dispatch]);
 
+    const renderItem = useCallback(({ item }: { item: Order }) => {
+        return (
+            <FastImage
+                source={{ uri: `${Config.API_URL}/${item.image}` }}
+                resizeMode="contain"
+                style={{
+                    height: Dimensions.get('window').width / 3,
+                    width: Dimensions.get('window').width / 3,
+                }}
+            />
+        );
+    }, []);
+
     return (
         <View>
             <View style={styles.money}>
@@ -63,6 +91,14 @@ function Settings() {
                     </Text>
                     원
                 </Text>
+            </View>
+            <View>
+                <FlatList
+                    data={completes}
+                    numcolumns={3}
+                    keyExtractor={o => o.orderId}
+                    renderItem={renderItem}
+                />
             </View>
             <View style={styles.buttonZone}>
                 <Pressable

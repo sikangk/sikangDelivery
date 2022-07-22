@@ -12,17 +12,22 @@ export interface Order {
     };
 
     price: number;
+    image?: string;
+    rider?: string;
+    completedAt?: string;
 
 }
 
 export interface InitialState {
     orders: Order[];
     deliveries: Order[];
+    completes: Order[];
 }
 
 const initialState: InitialState = {
     orders: [],
     deliveries: [],
+    completes: []
 }
 
 const orderSlice = createSlice({
@@ -46,7 +51,16 @@ const orderSlice = createSlice({
             if (index > -1) {
                 state.orders.splice(index, 1);
             }
+
+            const delivery = state.deliveries.findIndex(v => v.orderId === action.payload);
+
+            if (delivery > -1) {
+                state.deliveries.splice(delivery, 1);
+            }
         },
+        setCompletes(state, action) {
+            state.completes = action.payload
+        }
     },
     extraReducers(builder) {
 

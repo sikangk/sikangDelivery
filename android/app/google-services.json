@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "114776049199",
+    "project_id": "sikangdelivery",
+    "storage_bucket": "sikangdelivery.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:114776049199:android:7ed0ba61bd2e6b401328da",
+        "android_client_info": {
+          "package_name": "com.sikangdelivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "114776049199-320jeqq79uvr71kf2icjp6konrfnhukj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAa90JZEYBTq1hseP-f53Wwhe5N5vJT8Go"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "114776049199-320jeqq79uvr71kf2icjp6konrfnhukj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

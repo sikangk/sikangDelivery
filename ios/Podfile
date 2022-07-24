@@ -14,8 +14,14 @@ target 'sikangDelivery' do
   pod 'Permission-LocationWhenInUse', :path => "#{permissions_path}/LocationWhenInUse"
   pod 'Permission-Notifications', :path => "#{permissions_path}/Notifications"
   pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary"
+
+  # pod 'Fire'
+  # pod 'Firebase/Analytics'
+  # pod 'Firebase/Messaging'
+
   
   config = use_native_modules!
+  pod 'GoogleUtilities', :modular_headers => true
 
   # Flags change depending on the env values.
   flags = get_default_flags()
